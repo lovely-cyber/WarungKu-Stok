@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="stats">
+  <div><b>{{ stats.total }}</b><span>jenis barang</span></div>
+  <div><b>{{ stats.stok }}</b><span>total stok</span></div>
+  <div><b>{{ stats.nilai|rupiah }}</b><span>nilai stok</span></div>
+  <div class="{{ 'warn' if stats.menipis }}"><b>{{ stats.menipis }}</b><span>hampir habis</span></div>
+</section>
+
+<div class="layout">
+  <aside class="panel">
+    <h2>Tambah barang</h2>
+    {% with item = None, action = url_for('tambah'), label = 'Simpan barang' %}
+      {% include "_form.html" %}
+    {% endwith %}
+  </aside>
+
+  <section>
+    <form class="toolbar" method="get">
+      <input type="search" name="q" value="{{ q }}" placeholder="Cari nama barang" aria-label="Cari nama barang">
+      <select name="kategori" aria-label="Filter kategori">
+        <option value="">Semua kategori</option>
+        {% for k in kategori %}<option {{ 'selected' if kat == k }}>{{ k }}</option>{% endfor %}
+      </select>
+      <button class="btn">Cari</button>
+      {% if q or kat %}<a class="reset" href="{{ url_for('index') }}">Reset</a>{% endif %}
+    </form>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Barang</th><th>Kategori</th><th class="num">Harga</th><th class="num">Stok</th><th>Aksi</th></tr></thead>
+        <tbody>
+        {% for b in items %}
+          {% set low = b.stok <= b.stok_min %}
+          <tr class="{{ 'low' if low }}">
+            <td><strong>{{ b.nama }}</strong>{% if low %}<span class="tag">Hampir habis</span>{% endif %}</td>
+            <td>{{ b.kategori }}</td>
+            <td class="num">{{ b.harga|rupiah }}</td>
+            <td class="num">
+              <form class="inline" method="post" action="/stok/{{ b.id }}/-1"><button class="step" aria-label="Kurangi stok">&minus;</button></form>
+              <span class="qty">{{ b.stok }}</span>
+              <form class="inline" method="post" action="/stok/{{ b.id }}/1"><button class="step" aria-label="Tambah stok">+</button></form>
+            </td>
+            <td class="act">
+              <a href="{{ url_for('edit', id=b.id) }}">Edit</a>
+              <form class="inline" method="post" action="{{ url_for('hapus', id=b.id) }}" onsubmit="return confirm('Hapus barang ini?')">
+                <button class="link danger">Hapus</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="empty">
+            {% if q or kat %}Tidak ada barang yang cocok dengan pencarian.
+            {% else %}Belum ada barang. Isi form di samping untuk mencatat barang pertama.{% endif %}
+          </td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

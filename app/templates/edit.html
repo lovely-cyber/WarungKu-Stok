@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel narrow">
+  <h2>Edit barang</h2>
+  {% with action = url_for('edit', id=item.id), label = 'Simpan perubahan' %}
+    {% include "_form.html" %}
+  {% endwith %}
+  <a class="reset" href="{{ url_for('index') }}">Batal</a>
+</div>
+{% endblock %}

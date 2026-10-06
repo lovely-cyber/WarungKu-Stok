@@ -1,0 +1,23 @@
+<form method="post" action="{{ action }}" class="form">
+  <label>Nama barang
+    <input name="nama" value="{{ item.nama if item else '' }}" maxlength="100" required placeholder="Contoh: Beras 5 kg">
+  </label>
+  <label>Kategori
+    <select name="kategori">
+      {% for k in kategori %}<option {{ 'selected' if item and item.kategori == k }}>{{ k }}</option>{% endfor %}
+    </select>
+  </label>
+  <div class="row2">
+    <label>Harga (Rp)
+      <input type="number" name="harga" min="0" value="{{ item.harga if item else '' }}" required>
+    </label>
+    <label>Stok
+      <input type="number" name="stok" min="0" value="{{ item.stok if item else '' }}" required>
+    </label>
+  </div>
+  <label>Batas stok hampir habis
+    <input type="number" name="stok_min" min="0" value="{{ item.stok_min if item else 5 }}" required>
+    <small>Barang ditandai jika stoknya sama dengan atau di bawah angka ini.</small>
+  </label>
+  <button class="btn primary">{{ label }}</button>
+</form>

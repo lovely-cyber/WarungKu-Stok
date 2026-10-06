@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WarungKu Stok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="awning" aria-hidden="true"></div>
+<header class="top">
+  <a class="brand" href="{{ url_for('index') }}">WarungKu Stok</a>
+  <p>Catat stok, langsung tahu mana yang hampir habis.</p>
+</header>
+<main>
+  {% with pesan = get_flashed_messages() %}
+    {% for m in pesan %}<div class="flash" role="status">{{ m }}</div>{% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<footer>WarungKu Stok &middot; Tugas Container (Flask, PostgreSQL, Docker)</footer>
+</body>
+</html>

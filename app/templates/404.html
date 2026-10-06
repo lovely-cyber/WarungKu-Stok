@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel narrow">
+  <h2>Barang tidak ditemukan</h2>
+  <p>Barang ini mungkin sudah dihapus.</p>
+  <a class="btn primary" href="{{ url_for('index') }}">Kembali ke daftar stok</a>
+</div>
+{% endblock %}
