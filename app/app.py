@@ -19,14 +19,14 @@ AKUN = [
     {
         "role": "admin",
         "username": os.environ.get("ADMIN_USER", "admin"),
-        "email": os.environ.get("ADMIN_EMAIL", "admin@warungku.local"),
+        "email": os.environ.get("ADMIN_EMAIL", "admin@gmail.com"),
         "password": os.environ.get("ADMIN_PASSWORD", "admin123"),
     },
     {
         "role": "karyawan",
         "username": os.environ.get("KARYAWAN_USER", "karyawan"),
-        "email": os.environ.get("KARYAWAN_EMAIL", "karyawan@warungku.local"),
-        "password": os.environ.get("KARYAWAN_PASSWORD", "karyawan123"),
+        "email": os.environ.get("KARYAWAN_EMAIL", "karyawan@gmail.com"),
+        "password": os.environ.get("KARYAWAN_PASSWORD", "karyawan1"),
     },
 ]
 
@@ -121,7 +121,7 @@ def login():
             return redirect(url_for("index"))
         return render_template(
             "login.html",
-            error="Email/username atau password salah, atau peran tidak sesuai.",
+            error="Email/username atau password anda salah",
             identitas=identitas.strip(), peran=peran), 401
     return render_template("login.html", error=None, identitas="", peran="karyawan")
 
