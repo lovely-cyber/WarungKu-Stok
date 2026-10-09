@@ -26,6 +26,12 @@ services:
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}
       SECRET_KEY: ${SECRET_KEY}
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      KARYAWAN_USER: ${KARYAWAN_USER}
+      KARYAWAN_EMAIL: ${KARYAWAN_EMAIL}
+      KARYAWAN_PASSWORD: ${KARYAWAN_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
