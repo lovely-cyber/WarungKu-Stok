@@ -131,7 +131,7 @@
             <form
               class="inline"
               method="post"
-              action="{{ url_for('ubah_stok', id=b.id, delta=1, neg=True) }}"
+              action="/stok/{{ b.id }}/-1"
             >
               <button
                 class="step"
@@ -147,7 +147,7 @@
             <form
               class="inline"
               method="post"
-              action="{{ url_for('ubah_stok', id=b.id, delta=1) }}"
+              action="/stok/{{ b.id }}/1"
             >
               <button
                 class="step"
