@@ -39,6 +39,13 @@
   </div>
 </section>
 
+{% if stats.menipis %}
+<div class="alert-stok" role="alert">
+  ⚠️ Perhatian: ada <strong>{{ stats.menipis }}</strong> barang yang stoknya hampir habis.
+  Segera lakukan restok.
+</div>
+{% endif %}
+
 <!-- Layout -->
 
 <div class="layout">
@@ -84,6 +91,19 @@
     <a class="reset" href="{{ url_for('index') }}">Reset</a>
   {% endif %}
 </form>
+
+<div class="info-bar">
+  <span class="info-count">
+    Menampilkan <strong>{{ items|length }}</strong> barang
+    {% if q %} untuk "<em>{{ q }}</em>"{% endif %}
+    {% if kat %} dalam kategori <em>{{ kat }}</em>{% endif %}
+  </span>
+
+  <span class="info-actions">
+    <button type="button" class="btn-mini" id="btn-export" title="Unduh daftar barang sebagai CSV">⬇️ Ekspor CSV</button>
+    <button type="button" class="btn-mini" id="btn-print" title="Cetak daftar barang">🖨️ Cetak</button>
+  </span>
+</div>
 
 <!-- Tabel Barang -->
 <div class="table-wrap">
@@ -204,6 +224,8 @@
   </section>
 </div>
 
+<button type="button" id="btn-top" class="btn-top" aria-label="Kembali ke atas" title="Kembali ke atas">↑</button>
+
 <!-- Style khusus halaman Admin -->
 
 <style>
@@ -254,5 +276,243 @@
     }
   }
 </style>
+
+<style>
+  .alert-stok {
+    margin: 0 0 20px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #fff3cd;
+    border: 1px solid #ffe08a;
+    color: #664d03;
+  }
+
+  .info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0;
+    font-size: 0.9rem;
+  }
+
+  .info-actions {
+    display: inline-flex;
+    gap: 8px;
+  }
+
+  .btn-mini {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: 0.2s;
+  }
+
+  .btn-mini:hover {
+    background: #f1f1f1;
+  }
+
+  thead th {
+    user-select: none;
+  }
+
+  thead th.sortable {
+    cursor: pointer;
+  }
+
+  thead th.sortable:hover {
+    text-decoration: underline;
+  }
+
+  thead th .arrow {
+    margin-left: 4px;
+    font-size: 0.75em;
+    opacity: 0.7;
+  }
+
+  tbody tr:hover {
+    background: rgba(0, 0, 0, 0.03);
+  }
+
+  .btn-top {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: #333;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .btn-top.show {
+    opacity: 0.85;
+    pointer-events: auto;
+  }
+
+  button.is-loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  @media print {
+    .btn-logout,
+    .toolbar,
+    .info-actions,
+    .btn-top,
+    .panel,
+    .act,
+    .step {
+      display: none !important;
+    }
+
+    .layout {
+      display: block !important;
+    }
+  }
+</style>
+
+<script>
+(function () {
+  var table = document.querySelector('.table-wrap table');
+  if (!table) return;
+  var tbody = table.querySelector('tbody');
+
+  var headers = table.querySelectorAll('thead th');
+  var sortState = { col: -1, asc: true };
+
+  function cellValue(row, idx, isNum) {
+    var cell = row.cells[idx];
+    if (!cell) return '';
+    var text;
+    if (idx === 3) {
+      var q = cell.querySelector('.qty');
+      text = q ? q.textContent : cell.textContent;
+    } else {
+      text = cell.textContent;
+    }
+    text = text.trim();
+    if (isNum) {
+      var n = parseFloat(text.replace(/[^\d]/g, ''));
+      return isNaN(n) ? 0 : n;
+    }
+    return text.toLowerCase();
+  }
+
+  headers.forEach(function (th, idx) {
+    if (idx === headers.length - 1) return;    th.classList.add('sortable');
+    th.setAttribute('title', 'Klik untuk mengurutkan');
+    var arrow = document.createElement('span');
+    arrow.className = 'arrow';
+    th.appendChild(arrow);
+
+    th.addEventListener('click', function () {
+      var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+      if (rows.length < 2 || rows[0].cells.length < 2) return;
+
+      var isNum = th.classList.contains('num');
+      sortState.asc = (sortState.col === idx) ? !sortState.asc : true;
+      sortState.col = idx;
+
+      rows.sort(function (a, b) {
+        var x = cellValue(a, idx, isNum);
+        var y = cellValue(b, idx, isNum);
+        if (x < y) return sortState.asc ? -1 : 1;
+        if (x > y) return sortState.asc ? 1 : -1;
+        return 0;
+      });
+      rows.forEach(function (r) { tbody.appendChild(r); });
+
+      headers.forEach(function (h) {
+        var a = h.querySelector('.arrow');
+        if (a) a.textContent = '';
+      });
+      arrow.textContent = sortState.asc ? '▲' : '▼';
+    });
+  });
+
+  var btnExport = document.getElementById('btn-export');
+  if (btnExport) {
+    btnExport.addEventListener('click', function () {
+      var rows = tbody.querySelectorAll('tr');
+      var lines = ['Barang,Kategori,Harga,Stok'];
+      rows.forEach(function (r) {
+        if (r.cells.length < 4) return;
+        var strong = r.cells[0].querySelector('strong');
+        var nama = (strong ? strong.textContent : r.cells[0].textContent).trim();
+        var kat = r.cells[1].textContent.trim();
+        var harga = r.cells[2].textContent.replace(/[^\d]/g, '');
+        var qty = r.cells[3].querySelector('.qty');
+        var stok = (qty ? qty.textContent : '').trim();
+        var vals = [nama, kat, harga, stok].map(function (v) {
+          return '"' + String(v).replace(/"/g, '""') + '"';
+        });
+        lines.push(vals.join(','));
+      });
+
+      if (lines.length === 1) {
+        alert('Tidak ada data untuk diekspor.');
+        return;
+      }
+
+      var blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'daftar-barang-warungku.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    });
+  }
+
+  var btnPrint = document.getElementById('btn-print');
+  if (btnPrint) {
+    btnPrint.addEventListener('click', function () { window.print(); });
+  }
+
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target.tagName || '').toLowerCase();
+    if (e.key === '/' && tag !== 'input' && tag !== 'textarea' && tag !== 'select') {
+      var search = document.querySelector('input[name="q"]');
+      if (search) {
+        e.preventDefault();
+        search.focus();
+        search.select();
+      }
+    }
+  });
+
+  document.querySelectorAll('form[method="post"]').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      if (e.defaultPrevented) return;
+      var btn = f.querySelector('button[type="submit"]');
+      if (btn) {
+        setTimeout(function () { btn.classList.add('is-loading'); }, 0);
+      }
+    });
+  });
+
+  var btnTop = document.getElementById('btn-top');
+  if (btnTop) {
+    window.addEventListener('scroll', function () {
+      btnTop.classList.toggle('show', window.scrollY > 300);
+    });
+    btnTop.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+})();
+</script>
 
 {% endblock %}
