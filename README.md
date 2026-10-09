@@ -3,6 +3,7 @@
 Aplikasi web pencatatan stok barang warung. Dibuat dengan Flask dan PostgreSQL, dijalankan dengan Docker Compose.
 
 ## Fitur
+- Login dengan dua peran: admin (semua fitur) dan karyawan (lihat daftar dan ubah stok saja)
 - CRUD barang: tambah, lihat, ubah, hapus
 - Tombol + / - untuk mengubah stok dengan cepat
 - Batas stok hampir habis per barang, dengan penanda otomatis
@@ -17,6 +18,9 @@ Aplikasi web pencatatan stok barang warung. Dibuat dengan Flask dan PostgreSQL, 
 |---|---|
 | Aplikasi | http://localhost:5000 |
 | Adminer (database) | http://localhost:8080 (System: PostgreSQL, Server: db, isi lainnya dari .env) |
+
+## Akun
+Username, email, dan password diatur di file `.env` (lihat `.env.example`). Pilih peran saat login.
 
 ## Menghentikan
     docker compose down        # data tetap ada (volume dbdata)
