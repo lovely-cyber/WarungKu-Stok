@@ -1,62 +1,262 @@
 {% extends "base.html" %}
 {% block content %}
+
+<!-- Header Admin -->
+
+<div class="admin-header">
+  <div>
+    <h1>Dashboard Admin</h1>
+    <p>Kelola data dan stok barang WarungKu.</p>
+  </div>
+
+<a href="{{ url_for('logout') }}" class="btn-logout"
+  onclick="return confirm('Apakah Anda yakin ingin logout?')">
+🚪 Logout </a>
+
+</div>
+
+<!-- Statistik -->
+
 <section class="stats">
-  <div><b>{{ stats.total }}</b><span>jenis barang</span></div>
-  <div><b>{{ stats.stok }}</b><span>total stok</span></div>
-  <div><b>{{ stats.nilai|rupiah }}</b><span>nilai stok</span></div>
-  <div class="{{ 'warn' if stats.menipis }}"><b>{{ stats.menipis }}</b><span>hampir habis</span></div>
+  <div>
+    <b>{{ stats.total }}</b>
+    <span>jenis barang</span>
+  </div>
+
+  <div>
+    <b>{{ stats.stok }}</b>
+    <span>total stok</span>
+  </div>
+
+  <div>
+    <b>{{ stats.nilai|rupiah }}</b>
+    <span>nilai stok</span>
+  </div>
+
+  <div class="{{ 'warn' if stats.menipis }}">
+    <b>{{ stats.menipis }}</b>
+    <span>hampir habis</span>
+  </div>
 </section>
 
+<!-- Layout -->
+
 <div class="layout">
+
+  <!-- Form Tambah Barang -->
+
   <aside class="panel">
     <h2>Tambah barang</h2>
-    {% with item = None, action = url_for('tambah'), label = 'Simpan barang' %}
-      {% include "_form.html" %}
-    {% endwith %}
+
+```
+{% with item = None, action = url_for('tambah'), label = 'Simpan barang' %}
+  {% include "_form.html" %}
+{% endwith %}
+```
+
   </aside>
 
-  <section>
-    <form class="toolbar" method="get">
-      <input type="search" name="q" value="{{ q }}" placeholder="Cari nama barang" aria-label="Cari nama barang">
-      <select name="kategori" aria-label="Filter kategori">
-        <option value="">Semua kategori</option>
-        {% for k in kategori %}<option {{ 'selected' if kat == k }}>{{ k }}</option>{% endfor %}
-      </select>
-      <button class="btn">Cari</button>
-      {% if q or kat %}<a class="reset" href="{{ url_for('index') }}">Reset</a>{% endif %}
-    </form>
+  <!-- Daftar Barang -->
 
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Barang</th><th>Kategori</th><th class="num">Harga</th><th class="num">Stok</th><th>Aksi</th></tr></thead>
-        <tbody>
-        {% for b in items %}
-          {% set low = b.stok <= b.stok_min %}
-          <tr class="{{ 'low' if low }}">
-            <td><strong>{{ b.nama }}</strong>{% if low %}<span class="tag">Hampir habis</span>{% endif %}</td>
-            <td>{{ b.kategori }}</td>
-            <td class="num">{{ b.harga|rupiah }}</td>
-            <td class="num">
-              <form class="inline" method="post" action="/stok/{{ b.id }}/-1"><button class="step" aria-label="Kurangi stok">&minus;</button></form>
-              <span class="qty">{{ b.stok }}</span>
-              <form class="inline" method="post" action="/stok/{{ b.id }}/1"><button class="step" aria-label="Tambah stok">+</button></form>
-            </td>
-            <td class="act">
-              <a href="{{ url_for('edit', id=b.id) }}">Edit</a>
-              <form class="inline" method="post" action="{{ url_for('hapus', id=b.id) }}" onsubmit="return confirm('Hapus barang ini?')">
-                <button class="link danger">Hapus</button>
-              </form>
-            </td>
-          </tr>
-        {% else %}
-          <tr><td colspan="5" class="empty">
-            {% if q or kat %}Tidak ada barang yang cocok dengan pencarian.
-            {% else %}Belum ada barang. Isi form di samping untuk mencatat barang pertama.{% endif %}
-          </td></tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
+  <section>
+
+```
+<!-- Search & Filter -->
+<form class="toolbar" method="get">
+  <input
+    type="search"
+    name="q"
+    value="{{ q }}"
+    placeholder="Cari nama barang"
+    aria-label="Cari nama barang"
+  >
+
+  <select name="kategori" aria-label="Filter kategori">
+    <option value="">Semua kategori</option>
+
+    {% for k in kategori %}
+      <option value="{{ k }}" {{ 'selected' if kat == k }}>
+        {{ k }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <button class="btn" type="submit">Cari</button>
+
+  {% if q or kat %}
+    <a class="reset" href="{{ url_for('index') }}">Reset</a>
+  {% endif %}
+</form>
+
+<!-- Tabel Barang -->
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Barang</th>
+        <th>Kategori</th>
+        <th class="num">Harga</th>
+        <th class="num">Stok</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for b in items %}
+
+        {% set low = b.stok <= b.stok_min %}
+
+        <tr class="{{ 'low' if low }}">
+
+          <!-- Nama Barang -->
+          <td>
+            <strong>{{ b.nama }}</strong>
+
+            {% if low %}
+              <span class="tag">Hampir habis</span>
+            {% endif %}
+          </td>
+
+          <!-- Kategori -->
+          <td>{{ b.kategori }}</td>
+
+          <!-- Harga -->
+          <td class="num">
+            {{ b.harga|rupiah }}
+          </td>
+
+          <!-- Stok -->
+          <td class="num">
+
+            <form
+              class="inline"
+              method="post"
+              action="{{ url_for('ubah_stok', id=b.id, delta=1, neg=True) }}"
+            >
+              <button
+                class="step"
+                type="submit"
+                aria-label="Kurangi stok"
+              >
+                &minus;
+              </button>
+            </form>
+
+            <span class="qty">{{ b.stok }}</span>
+
+            <form
+              class="inline"
+              method="post"
+              action="{{ url_for('ubah_stok', id=b.id, delta=1) }}"
+            >
+              <button
+                class="step"
+                type="submit"
+                aria-label="Tambah stok"
+              >
+                +
+              </button>
+            </form>
+
+          </td>
+
+          <!-- Aksi -->
+          <td class="act">
+
+            <a href="{{ url_for('edit', id=b.id) }}">
+              Edit
+            </a>
+
+            <form
+              class="inline"
+              method="post"
+              action="{{ url_for('hapus', id=b.id) }}"
+              onsubmit="return confirm('Hapus barang ini?')"
+            >
+              <button
+                type="submit"
+                class="link danger"
+              >
+                Hapus
+              </button>
+            </form>
+
+          </td>
+
+        </tr>
+
+      {% else %}
+
+        <tr>
+          <td colspan="5" class="empty">
+
+            {% if q or kat %}
+              Tidak ada barang yang cocok dengan pencarian.
+            {% else %}
+              Belum ada barang. Isi form di samping untuk mencatat barang pertama.
+            {% endif %}
+
+          </td>
+        </tr>
+
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+```
+
   </section>
 </div>
+
+<!-- Style khusus halaman Admin -->
+
+<style>
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .admin-header h1 {
+    margin: 0 0 6px;
+  }
+
+  .admin-header p {
+    margin: 0;
+    opacity: 0.75;
+  }
+
+  .btn-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 8px;
+    background: #dc3545;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-logout:hover {
+    background: #bb2d3b;
+    color: #fff;
+  }
+
+  @media (max-width: 600px) {
+    .admin-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .btn-logout {
+      width: 100%;
+    }
+  }
+</style>
+
 {% endblock %}
