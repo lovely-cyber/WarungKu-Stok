@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel login">
+  <h2>Masuk ke WarungKu Stok</h2>
+  <p class="hint">Pilih peran, lalu masukkan username atau email dan password.</p>
+
+  {% if error %}
+    <div class="alert" role="alert">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" class="form">
+    <fieldset class="peran">
+      <legend>Masuk sebagai</legend>
+      <label><input type="radio" name="peran" value="karyawan" {{ 'checked' if peran != 'admin' }}> Karyawan</label>
+      <label><input type="radio" name="peran" value="admin" {{ 'checked' if peran == 'admin' }}> Admin</label>
+    </fieldset>
+
+    <label>Username atau email
+      <input name="identitas" value="{{ identitas }}" required autofocus autocomplete="username">
+    </label>
+    <label>Password
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+    <button class="btn primary" type="submit">Masuk</button>
+  </form>
+</div>
+
+<style>
+  .panel.login{max-width:420px;margin:24px auto}
+  .login .hint{margin:-6px 0 14px;color:var(--muted);font-size:.92rem}
+  .login .alert{background:#FBE9E7;color:var(--red);border:1px solid #F0C4BF;padding:.6rem .8rem;border-radius:8px;margin-bottom:14px;font-weight:500}
+  .login .peran{border:1px solid var(--line);border-radius:8px;padding:8px 12px 10px;margin:0 0 14px;display:flex;gap:20px;flex-wrap:wrap}
+  .login .peran legend{padding:0 6px;font-weight:500;font-size:.92rem}
+  .login .peran label{display:flex;align-items:center;gap:6px;margin:0;font-weight:400}
+  .login .peran input{width:auto;margin:0}
+</style>
+{% endblock %}
