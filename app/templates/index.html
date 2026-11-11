@@ -109,9 +109,7 @@
           <td>
             <strong>{{ b.nama }}</strong>
 
-            {% if b.stok == 0 %}
-              <span class="tag tag-habis">Stok habis</span>
-            {% elif low %}
+            {% if low %}
               <span class="tag">Hampir habis</span>
             {% endif %}
           </td>
@@ -136,7 +134,6 @@
                 class="step"
                 type="submit"
                 aria-label="Kurangi stok"
-                {{ 'disabled' if b.stok == 0 }}
               >
                 &minus;
               </button>
@@ -244,16 +241,6 @@
   .btn-logout:hover {
     background: #bb2d3b;
     color: #fff;
-  }
-
-  .tag.tag-habis {
-    background: #dc3545;
-    color: #fff;
-  }
-
-  .step:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
   }
 
   @media (max-width: 600px) {
