@@ -35,12 +35,12 @@
       {% for b in items %}
         {% set low = b.stok <= b.stok_min %}
         <tr class="{{ 'low' if low }}">
-          <td><strong>{{ b.nama }}</strong>{% if low %}<span class="tag">Hampir habis</span>{% endif %}</td>
+          <td><strong>{{ b.nama }}</strong>{% if b.stok == 0 %}<span class="tag tag-habis">Stok habis</span>{% elif low %}<span class="tag">Hampir habis</span>{% endif %}</td>
           <td>{{ b.kategori }}</td>
           <td class="num">{{ b.harga|rupiah }}</td>
           <td class="num">
             <form class="inline" method="post" action="/stok/{{ b.id }}/-1">
-              <button class="step" type="submit" aria-label="Kurangi stok">&minus;</button>
+              <button class="step" type="submit" aria-label="Kurangi stok" {{ 'disabled' if b.stok == 0 }}>&minus;</button>
             </form>
             <span class="qty">{{ b.stok }}</span>
             <form class="inline" method="post" action="/stok/{{ b.id }}/1">
@@ -63,6 +63,8 @@
   .kar-header p{margin:0;opacity:.75}
   .kar-logout{display:inline-flex;padding:10px 18px;border-radius:8px;background:#dc3545;color:#fff;text-decoration:none;font-weight:600;white-space:nowrap}
   .kar-logout:hover{background:#bb2d3b}
+  .tag.tag-habis{background:#dc3545;color:#fff}
+  .step:disabled{opacity:.35;cursor:not-allowed}
   .kar-stats{grid-template-columns:repeat(3,1fr)}
   @media (max-width:600px){
     .kar-header{flex-direction:column;align-items:flex-start}
